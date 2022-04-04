@@ -1,11 +1,11 @@
-# BrickBreaker
+# 🧱🔨 BrickBreaker 🧱🔨
 Creating a game in python using the pygame library.
 
-> Python game for breaking blocks and 
+> Python game for a breakout-style clone.
 
-### Ajustes e melhorias
+### Adjustments and improvements
 
-O projeto ainda está em desenvolvimento e as próximas atualizações serão voltadas nas seguintes tarefas:
+The project is still under development and the next updates will focus on the following tasks:
 
 - [x] Basic Game (Paddle, Ball, Blocks, Physics)
 - [x] Levels 
@@ -13,28 +13,23 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [ ] Life and Scores
 - [ ] Power-ups and Power-downs
 
-## 💻 Pré-requisitos
+## 💻 Requirements
 
-Antes de começar, verifique se você atende aos seguintes requisitos:
+Before you start, make sure you meet the following requirements:
 * Python 3.x
 
-## 🚀 Instalando BrickBreaker
+## 🚀 Installing BrickBreaker
 
-Para instalar o <nome_do_projeto>, siga estas etapas:
+To install BrickBreaker, follow these steps:
+
 ```
 pip install -r requirements.txt
 ```
 
-## ☕ Usando BrickBreaker
+## ☕ Using BrickBreaker
 
-Para usar BrickBreaker, siga estas etapas:
+To use BrickBreaker, follow these steps:
 
 ```
 python main.py
 ```
-
-## 📝 Licença
-
-Esse projeto está sob licença. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
-
-[⬆ Voltar ao topo](#nome-do-projeto)<br>

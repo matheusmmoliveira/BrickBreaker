@@ -1,23 +1,21 @@
-import sys
-
 import pygame
 from settings import *
 from random import uniform
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, groups, paddle):
+    def __init__(self, groups, paddle, blocks):
         super().__init__(groups)
         # Setup
         # image is mandatory attribute for pygame sprites.
         self.image = pygame.image.load(BASE_DIR / 'assets' / 'imgs' / 'ball.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (30, 30))
         self.paddle = paddle
+        self.blocks = blocks
 
         # Initial Position
         self.rect = self.image.get_rect(midbottom=paddle.rect.midtop)
         self.previous_rect = self.rect.copy()
-        # self.pos = pygame.math.Vector2(self.rect.topleft)
         self.direction = pygame.math.Vector2(uniform(-5, 5), -1)
         self.speed = 10
 
@@ -48,26 +46,34 @@ class Ball(pygame.sprite.Sprite):
             self.active = False
 
     def collision(self):
-        overlap_sprites = []
+        overlap_sprites = pygame.sprite.spritecollide(self, self.blocks, False)
         if self.rect.colliderect(self.paddle.rect):
             overlap_sprites.append(self.paddle)
 
         if overlap_sprites:
             for sprite in overlap_sprites:
                 # Horizontal Collision
+                # Right of the ball colliding into the left of another sprite
                 if self.rect.right >= sprite.rect.left and self.previous_rect.right <= sprite.previous_rect.left:
-                    self.rect.right = sprite.rect.left
+                    self.rect.right = sprite.rect.left - 1
                     self.direction.x *= -1
+                # Left of the ball collinding into the right of another sprite
                 if self.rect.left <= sprite.rect.right and self.previous_rect.left >= sprite.previous_rect.right:
-                    self.rect.left = sprite.rect.right
-                    self.direction.x = -1
+                    self.rect.left = sprite.rect.right + 1
+                    self.direction.x *= -1
                 # Vertical Collision
+                # Top of the ball collinding into the bottom of another sprite
                 if self.rect.top <= sprite.rect.bottom and self.previous_rect.top >= sprite.previous_rect.bottom:
-                    self.rect.top = sprite.rect.bottom
+                    self.rect.top = sprite.rect.bottom + 1
                     self.direction.y *= -1
+                # Bottom of the ball collinding into the top of another sprite
                 if self.rect.bottom >= sprite.rect.top and self.previous_rect.bottom <= sprite.previous_rect.top:
-                    self.rect.bottom = sprite.rect.top
+                    self.rect.bottom = sprite.rect.top - 1
                     self.direction.y *= -1
+
+                # Check if sprite is a block with attribute strenght. Getattr calls Hasattr.
+                if getattr(sprite, 'strength', None):
+                    sprite.damage()
 
     def update(self):
         self.input()
@@ -84,7 +90,5 @@ class Ball(pygame.sprite.Sprite):
             self.rect.topleft += self.direction * self.speed
             self.screen_collision()
             self.collision()
-
         else:
             self.rect.midbottom = self.paddle.rect.midtop
-            # self.pos = pygame.math.Vector2(self.rect.topleft)

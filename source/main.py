@@ -3,6 +3,7 @@ import pygame
 from settings import *
 from paddle import Paddle
 from ball import Ball
+from level import Level
 import sys
 
 
@@ -20,16 +21,19 @@ class Game:
 
         # Sprite Group Setup
         self.all_sprites = pygame.sprite.Group()
+        self.block_sprites = pygame.sprite.Group()
 
+        # Setup First Level
+        level = Level()
+        level.setup_level([self.all_sprites, self.block_sprites])
         # Setup Sprites in the Canvas
         self.paddle = Paddle(self.all_sprites)
-        self.ball = Ball(self.all_sprites, self.paddle)
+        self.ball = Ball(self.all_sprites, self.paddle, self.block_sprites)
 
     def run(self):
         clock = pygame.time.Clock()
         while True:
             clock.tick(self.fps)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -37,7 +41,6 @@ class Game:
 
             # Update the game
             self.all_sprites.update()
-
             # Draw frame
             self.canvas.blit(self.background, (0, 0))
             self.all_sprites.draw(self.canvas)

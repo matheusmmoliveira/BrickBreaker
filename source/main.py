@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+import settings
 from paddle import Paddle
 from ball import Ball
 from level import Level
@@ -11,23 +11,24 @@ class BrickBreaker:
         # Initial setup
         pygame.init()
         pygame.display.set_caption('Quebração de bloco')
-        self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.fps = FPS
+        self.canvas = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+        self.fps = settings.FPS
 
         # Background
-        self.background = pygame.image.load(BASE_DIR / 'assets' / 'imgs' / 'background.png').convert()
-        self.background = pygame.transform.scale(self.background, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.background = pygame.image.load(settings.BASE_DIR / 'assets' / 'imgs' / 'background.png').convert()
+        self.background = pygame.transform.scale(self.background, (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
 
         # Sprite Group Setup
         self.all_sprites = pygame.sprite.Group()
-        self.block_sprites = pygame.sprite.Group()
+        self.blocks = pygame.sprite.Group()
 
         # Setup First Level
         level = Level()
-        level.setup_level([self.all_sprites, self.block_sprites])
+        level.setup_level([self.all_sprites, self.blocks])
+
         # Setup Sprites in the Canvas
         self.paddle = Paddle(self.all_sprites)
-        self.ball = Ball(self.all_sprites, self.paddle, self.block_sprites)
+        self.ball = Ball(self.all_sprites, self.paddle, self.blocks)
 
     def run(self):
         clock = pygame.time.Clock()

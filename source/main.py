@@ -1,4 +1,3 @@
-import time
 import pygame
 from settings import *
 from paddle import Paddle
@@ -7,7 +6,7 @@ from level import Level
 import sys
 
 
-class Game:
+class BrickBreaker:
     def __init__(self):
         # Initial setup
         pygame.init()
@@ -49,5 +48,5 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game()
+    game = BrickBreaker()
     game.run()

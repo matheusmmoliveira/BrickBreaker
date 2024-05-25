@@ -1,21 +1,23 @@
 import pygame
-from settings import *
 from random import uniform
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, groups, paddle, blocks):
-        super().__init__(groups)
-        # Setup
-        # image is mandatory attribute for pygame sprites.
-        self.image = pygame.image.load(BASE_DIR / 'assets' / 'imgs' / 'ball.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (30, 30))
-        self.paddle = paddle
+    def __init__(self, win_width, win_height, initial_position, blocks, paddle):
+        # Call the parent class (Sprite) constructor
+        pygame.sprite.Sprite.__init__(self)
+        self._window_width = win_width
+        self._window_height = win_height
+
         self.blocks = blocks
-        self.lives = 3
+        self.paddle = paddle
+
+        # image is mandatory attribute for pygame sprites.
+        self.image = pygame.image.load('assets/images/ball.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (30, 30))
 
         # Initial Position
-        self.rect = self.image.get_rect(midbottom=paddle.rect.midtop)
+        self.rect = self.image.get_rect(midbottom=initial_position)
         self.previous_rect = self.rect.copy()
         self.direction = pygame.math.Vector2(uniform(-0.5, 0.5), -1)
         self.speed = 10
@@ -40,24 +42,21 @@ class Ball(pygame.sprite.Sprite):
             self.rect.left = 0
             self.direction.x *= -1
         # Left or Right part of the screen
-        elif self.rect.right >= WINDOW_WIDTH:
-            self.rect.right = WINDOW_WIDTH
+        elif self.rect.right >= self._window_width:
+            self.rect.right = self._window_width
             self.direction.x *= -1
         # Top part of the screen
         elif self.rect.top <= 0:
             self.direction.y *= -1
         # Bottom part of screen. First pixel is top left of the screen.
-        elif self.rect.top > WINDOW_HEIGHT:
-            # self.lives -= 1
-            if self.lives == 0:
-                pygame.event.post(pygame.event.Event(pygame.QUIT))
+        elif self.rect.top > self._window_height:
             # Resets position and directions
             self.rect.midbottom = self.paddle.rect.midtop
             self.direction = pygame.math.Vector2(uniform(-3, 3), -1)
             self.active = False
 
     def paddle_collision(self):
-        if self.rect.colliderect(self.paddle.rect):
+        if self.rect.colliderect(self.paddle):
             # Handling ball collision with side of the paddle
             if self.rect.centery > self.paddle.rect.centery*1.02:  # 2% more to compensate for sprite not being rect.
                 self.rect.top = self.paddle.rect.bottom
@@ -106,9 +105,8 @@ class Ball(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top - 1
                 self.direction.y *= -1
 
-            # Deal damage to the block if it has a strength attribute
-            if hasattr(block, 'strength'):
-                block.damage()
+            # Deal damage to the block
+            block.damage()
 
     def update(self):
         self.input()

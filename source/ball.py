@@ -1,13 +1,14 @@
 import pygame
 from random import uniform
+from source import settings
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, win_width, win_height, initial_position, blocks, paddle):
+    def __init__(self, initial_position, blocks, paddle):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
-        self._window_width = win_width
-        self._window_height = win_height
+        self._window_width = settings.WINDOW_WIDTH
+        self._window_height = settings.WINDOW_HEIGHT
 
         self.blocks = blocks
         self.paddle = paddle

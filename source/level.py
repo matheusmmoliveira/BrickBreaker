@@ -1,13 +1,11 @@
 import pygame
 import pathlib
-
+from source import settings
 
 class Level:
-    def __init__(self, win_width, win_height):
+    def __init__(self):
         self.level = 1
         self.blocks = pygame.sprite.Group()
-        self._window_width = win_width
-        self._window_height = win_height
         self._block_gap = 2
 
         # Creating a dictionary of possible block textures using its name as key
@@ -20,8 +18,8 @@ class Level:
         with open(f'assets/levels/{self.level}.lvl', 'r') as level_file:
             block_map = [line.replace('\n', '') for line in level_file.readlines()]
 
-        block_height = (self._window_height * 0.6) / len(block_map) - self._block_gap
-        block_width = self._window_width / len(block_map[0]) - self._block_gap
+        block_height = (settings.WINDOW_HEIGHT * 0.6) / len(block_map) - self._block_gap
+        block_width = settings.WINDOW_WIDTH / len(block_map[0]) - self._block_gap
         for row_idx, row in enumerate(block_map):
             for col_idx, col in enumerate(row):
                 if col != '*':

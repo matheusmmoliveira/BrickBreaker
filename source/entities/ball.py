@@ -15,7 +15,6 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(midbottom=initial_pos)
         self.previous_rect = self.rect.copy()
         self.direction = pygame.math.Vector2(uniform(-1, 1), -1)
-        self.direction = pygame.math.Vector2(0, -1)
         self.speed = 500
 
         # Active
@@ -28,6 +27,7 @@ class Ball(pygame.sprite.Sprite):
 
     def move(self, dt):
         if self.active:
+            # Normal vector for keep momentum in diagonals
             if self.direction.magnitude() != 0:
                 self.direction = self.direction.normalize()
             self.rect.center += self.direction * self.speed * dt

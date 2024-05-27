@@ -1,3 +1,5 @@
+import pygame
+
 from source.settings import *
 import pathlib
 from source import settings
@@ -56,13 +58,38 @@ class Level:
                 self.brick_collision(hit_brick)
 
     def paddle_collision(self):
-        offset = (self.ball.rect.centerx - self.paddle.rect.centerx) / self.paddle.rect.width * 2
-        offset = max(-0.9, min(offset, 0.9))
-        # Upwards collision
-        if self.ball.rect.bottom >= self.paddle.rect.top and self.ball.previous_rect.bottom <= self.paddle.previous_rect.top:
-            self.ball.rect.bottom = self.paddle.rect.top
-            self.ball.direction.y *= -1
-            self.ball.direction.x += offset
+        # Calculate the relative position of the ball on the paddle
+        paddle_center_x = self.paddle.rect.centerx
+        ball_center_x = self.ball.rect.centerx
+        relative_position = (ball_center_x - paddle_center_x) / (self.paddle.rect.width / 2)
+
+        # Determine if the ball hits the top or sides of the paddle
+        if abs(self.ball.rect.bottom - self.paddle.rect.top) < 10 and self.ball.direction.y > 0:
+            # Adjust the direction based on where the ball hits the paddle
+            max_angle = 65  # Max bounce angle in degrees
+            bounce_angle = relative_position * max_angle
+            self.ball.direction = pygame.math.Vector2(0, -1).rotate(bounce_angle)
+            self.ball.rect.bottom = self.paddle.rect.top  # Ensure the ball is above the paddle
+
+        elif abs(self.ball.rect.right - self.paddle.rect.left) < 10 and self.ball.direction.x > 0:
+            if self.ball.rect.centery < self.paddle.rect.centery:
+                # Ball hits the upper right side of the paddle
+                self.ball.direction = pygame.math.Vector2(-1, -1).normalize()
+                self.ball.speed += 25
+            else:
+                # Ball hits the lower right side of the paddle
+                self.ball.direction = pygame.math.Vector2(-1, 1).normalize()
+            self.ball.rect.right = self.paddle.rect.left
+
+        elif abs(self.ball.rect.left - self.paddle.rect.right) < 10 and self.ball.direction.x < 0:
+            if self.ball.rect.centery < self.paddle.rect.centery:
+                # Ball hits the upper left side of the paddle
+                self.ball.direction = pygame.math.Vector2(1, -1).normalize()
+                self.ball.speed += 25
+            else:
+                # Ball hits the lower left side of the paddle
+                self.ball.direction = pygame.math.Vector2(1, 1).normalize()
+            self.ball.rect.left = self.paddle.rect.right
 
     def brick_collision(self, brick):
         # Horizontal Collision
@@ -85,10 +112,19 @@ class Level:
             self.ball.rect.bottom = brick.rect.top - 1
             self.ball.direction.y *= -1
 
+        # Get points
+        self.score += brick.strength
         # Deal damage to the block
         brick.damage()
 
+    def check_game_over(self):
+        if not self.ball.alive():
+            print(f"You made {self.score} points")
+            pygame.quit()
+            sys.exit()
+
     def run(self, dt):
-        self.check_collisions()
+        self.check_game_over()
         self.world.update(dt)
+        self.check_collisions()
         self.world.draw(self.screen)

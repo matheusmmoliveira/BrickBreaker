@@ -1,32 +1,27 @@
-import pygame
-import sys
-from source import level, paddle, ball, settings
+import time
 
-class BrickBreaker:
+from source.settings import *
+from source.level import Level
+from source.entities import ball, paddle
+
+
+class Game:
     def __init__(self):
-        # Initial setup
         pygame.init()
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption('Quebração de bloco')
-        self.screen = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.fps = settings.FPS
 
         # Background
         self.background = pygame.image.load('assets/images/background.png').convert()
-        self.background = pygame.transform.scale(self.background, (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+        self.background = pygame.transform.scale(self.background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
-        # Sprite Group Setup
-        self.world = pygame.sprite.Group()
-
-        # Setup all game objects
-        self.level = level.Level()
-        self.paddle = paddle.Paddle()
-        self.ball = ball.Ball(self.paddle.rect.midtop, self.level.blocks, self.paddle)
-
-        self.world.add(self.level.blocks, self.paddle, self.ball)
+        # Setup First Level Stage
+        self.current_stage = Level()
 
     def run(self):
         while True:
+            dt = self.clock.tick(FPS) / 1000
             self.screen.blit(self.background, (0, 0))
 
             for event in pygame.event.get():
@@ -34,14 +29,10 @@ class BrickBreaker:
                     pygame.quit()
                     sys.exit()
 
-            self.clock.tick(self.fps)
-
-            # Update All Sprites
-            self.world.update()
-            self.world.draw(self.screen)
+            self.current_stage.run(dt)
             pygame.display.update()
 
 
 if __name__ == '__main__':
-    game = BrickBreaker()
+    game = Game()
     game.run()

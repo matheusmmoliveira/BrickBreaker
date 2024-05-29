@@ -13,6 +13,8 @@ class Level:
         self.screen = pygame.display.get_surface()
         self.stage = stage
         self.score = 0
+        self.reward = 0
+        self.game_over = False
 
         # Creating a dictionary of possible block textures using its name as key
         _files = pathlib.Path('assets/images/blocks').glob("*.png")
@@ -20,12 +22,24 @@ class Level:
 
         # Sprite Group Setup
         self.world = pygame.sprite.Group()
-        self.blocks = pygame.sprite.Group()
+        self.collision_sprites = pygame.sprite.Group()
+        # self.blocks = pygame.sprite.Group()
 
         # Sprites
-        self.paddle = Paddle(self.world)
-        self.ball = Ball(self.world, initial_pos=self.paddle.rect.midtop)
-        self.blocks = self.setup_blocks()
+        self.paddle = Paddle((self.world,))
+        self.ball = Ball((self.world,), self.collision_sprites, initial_pos=self.paddle.rect.midtop)
+        # self.blocks = self.setup_blocks()
+
+    def input(self, action):
+        # [stop, left, right]
+        input_vector = pygame.math.Vector2(0, 0)
+        if action == 0:
+            pass
+        elif action == 1:
+            input_vector.x -= 1
+        elif action == 2:
+            input_vector.x += 1
+        self.paddle.direction = input_vector.normalize() if input_vector else input_vector
 
     def setup_blocks(self) -> pygame.sprite.Group:
         with open(f'assets/levels/{self.stage}.lvl', 'r') as level_file:
@@ -58,40 +72,18 @@ class Level:
                 self.brick_collision(hit_brick)
 
     def paddle_collision(self):
-        # Calculate the relative position of the ball on the paddle
-        paddle_center_x = self.paddle.rect.centerx
-        ball_center_x = self.ball.rect.centerx
-        relative_position = (ball_center_x - paddle_center_x) / (self.paddle.rect.width / 2)
-
-        # Determine if the ball hits the top or sides of the paddle
-        if abs(self.ball.rect.bottom - self.paddle.rect.top) < 10 and self.ball.direction.y > 0:
-            # Adjust the direction based on where the ball hits the paddle
-            max_angle = 65  # Max bounce angle in degrees
-            bounce_angle = relative_position * max_angle
-            self.ball.direction = pygame.math.Vector2(0, -1).rotate(bounce_angle)
-            self.ball.rect.bottom = self.paddle.rect.top  # Ensure the ball is above the paddle
-
-        elif abs(self.ball.rect.right - self.paddle.rect.left) < 10 and self.ball.direction.x > 0:
-            if self.ball.rect.centery < self.paddle.rect.centery:
-                # Ball hits the upper right side of the paddle
-                self.ball.direction = pygame.math.Vector2(-1, -1).normalize()
-                self.ball.speed += 25
-            else:
-                # Ball hits the lower right side of the paddle
-                self.ball.direction = pygame.math.Vector2(-1, 1).normalize()
-            self.ball.rect.right = self.paddle.rect.left
-
-        elif abs(self.ball.rect.left - self.paddle.rect.right) < 10 and self.ball.direction.x < 0:
-            if self.ball.rect.centery < self.paddle.rect.centery:
-                # Ball hits the upper left side of the paddle
-                self.ball.direction = pygame.math.Vector2(1, -1).normalize()
-                self.ball.speed += 25
-            else:
-                # Ball hits the lower left side of the paddle
-                self.ball.direction = pygame.math.Vector2(1, 1).normalize()
-            self.ball.rect.left = self.paddle.rect.right
+        if self.ball.rect.top > self.paddle.rect.top:
+            pass
+        elif self.paddle.rect.top <= self.ball.rect.bottom:
+            self.ball.rect.bottom = self.paddle.rect.top
+            self.ball.rect.y -= 1
+            self.ball.direction.y *= -1
+            self.reward = 10
+            self.score += 1
 
     def brick_collision(self, brick):
+        # AI gets reward
+        self.reward = 1
         # Horizontal Collision
         # Right of the ball colliding into the left of another sprite
         if self.ball.rect.right >= brick.rect.left and self.ball.previous_rect.right <= brick.previous_rect.left:
@@ -119,12 +111,14 @@ class Level:
 
     def check_game_over(self):
         if not self.ball.alive():
-            print(f"You made {self.score} points")
-            pygame.quit()
-            sys.exit()
+            self.reward = -10
+            self.game_over = True
 
-    def run(self, dt):
+    def run(self, action):
+        self.input(action)
+        self.world.update()
+        self.reward = 0
         self.check_game_over()
-        self.world.update(dt)
         self.check_collisions()
         self.world.draw(self.screen)
+        return self.reward, self.game_over, self.score

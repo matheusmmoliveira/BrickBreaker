@@ -1,1 +1,5 @@
 pygame-ce>=2.4
+torch>=2.3
+matplotlib>=3.9
+IPython>=8.24
+numpy~=1.26.4
